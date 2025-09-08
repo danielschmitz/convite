@@ -106,6 +106,26 @@
                 transform: translateY(-10px);
             }
         }
+
+        /* Estilo para os confetes */
+        .confetti {
+            position: absolute;
+            top: -20px; /* Começa acima da tela */
+            width: 10px;
+            height: 15px;
+            background-color: #f1c40f;
+            opacity: 0.9;
+            pointer-events: none; /* Impede que os confetes interfiram com o mouse */
+            animation: fall 5s linear forwards;
+        }
+
+        /* Animação de queda dos confetes */
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -162,6 +182,36 @@
         let isPointerDown = false;
         let pointerStartX = 0;
         let cardStartRotation = 0;
+        let confettiFired = false; // Variável de controle para o confete
+
+        const triggerConfetti = () => {
+            const confettiCount = 100;
+            const colors = ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#ffffff'];
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                
+                // Propriedades aleatórias para cada confete
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = `${Math.random() * 2 + 2}s`; // Duração entre 2s e 4s (mais rápido)
+                confetti.style.animationDelay = `${Math.random() * 1}s`; // Atraso de até 1s
+                
+                // Formas variadas (quadrado ou retângulo)
+                if (Math.random() > 0.5) {
+                    confetti.style.width = '8px';
+                    confetti.style.height = '12px';
+                }
+
+                document.body.appendChild(confetti);
+
+                // Remove o elemento da página após a animação terminar para não sobrecarregar
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000); // Tempo um pouco maior que a duração máxima da animação
+            }
+        };
 
         const onPointerDown = (e) => {
             isPointerDown = true;
@@ -193,6 +243,12 @@
             // Limita a rotação entre -180 (totalmente aberto) e 0 (fechado)
             newRotation = Math.max(-180, Math.min(0, newRotation));
             
+            // Dispara o confete assim que o usuário começa a arrastar para abrir
+            if (!confettiFired && newRotation < -5) {
+                triggerConfetti();
+                confettiFired = true;
+            }
+
             cardFront.style.transform = `rotateY(${newRotation}deg)`;
         };
 
@@ -202,7 +258,7 @@
 
             cardContainer.style.cursor = 'grab';
             // Reativa a transição para o efeito "snap" suave
-            cardFront.style.transition = 'transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+            cardFront.style.transition = 'transform 0.8s ease-in-out';
 
             // Pega a rotação atual do estilo do elemento
             const transform = cardFront.style.transform;
@@ -214,6 +270,7 @@
                 cardFront.style.transform = 'rotateY(-180deg)';
             } else {
                 cardFront.style.transform = 'rotateY(0deg)';
+                confettiFired = false; // Permite que o confete seja disparado novamente se o cartão for aberto de novo
             }
         };
 
@@ -231,6 +288,9 @@
 
 </body>
 </html>
+
+
+
 
 
 
