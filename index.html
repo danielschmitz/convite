@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convite de Aniversário Interativo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos gerais da página */
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #fdf2e9; /* Um tom de pêssego suave */
+            /* A altura agora é 100% da tela, já que não precisamos mais rolar */
+            height: 100vh; 
+            text-align: center;
+            overflow: hidden; /* Evita rolagem */
+            /* Impede a seleção de texto durante o arrasto */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Contêiner que segura o efeito 3D e fica fixo na tela */
+        .card-perspective-container {
+            /* Mantém o cartão centralizado */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            /* A MÁGICA DO 3D: cria a profundidade para a rotação do cartão */
+            perspective: 1500px;
+        }
+
+        /* O cartão em si, que conterá as duas faces (SVGs) */
+        .card-container {
+            width: 90vw;
+            max-width: 450px;
+            height: 70vh;
+            max-height: 650px;
+            position: relative;
+            /* Garante que os filhos (as faces do cartão) respeitem o espaço 3D */
+            transform-style: preserve-3d;
+        }
+        
+        /* Estilo comum para as duas faces do cartão (frente e dentro) */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            /* Esconde a "parte de trás" do elemento quando ele está rotacionado */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; /* Para compatibilidade */
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            overflow: hidden; /* Garante que o conteúdo do SVG não ultrapasse as bordas arredondadas */
+        }
+
+        /* A FRENTE DO CARTÃO */
+        #card-front {
+            z-index: 2; /* Fica na frente */
+            /* O ponto de origem da transformação é na borda esquerda, para abrir como um livro */
+            transform-origin: left center;
+            /* Transição para o efeito "snap" ao soltar - agora mais suave */
+            transition: transform 0.8s ease-in-out;
+            cursor: grab; /* Indica que o elemento é arrastável */
+        }
+
+        /* O INTERIOR DO CARTÃO */
+        #card-inside {
+            z-index: 1; /* Fica atrás */
+            /* O interior não se move, apenas é revelado */
+        }
+
+        /* Instruções para o usuário na parte inferior da tela */
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            font-family: 'Pacifico', cursive;
+            font-size: 1.5rem;
+            color: #e57373; /* Cor de destaque */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            /* Animação para chamar a atenção */
+            animation: bounce 2.5s infinite;
+            pointer-events: none; /* Evita que o texto interfira com o mouse */
+        }
+
+        /* Animação de "pulo" para as instruções */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card-perspective-container">
+        <div class="card-container">
+            <!-- SVG 1: A FRENTE DO CARTÃO -->
+            <svg id="card-front" class="card-face" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="frontGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#8e44ad; stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#3498db; stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="400" height="600" fill="url(#frontGradient)" />
+                <text x="200" y="280" font-family="Pacifico, cursive" font-size="48" fill="white" text-anchor="middle">Uma surpresa</text>
+                <text x="200" y="340" font-family="Pacifico, cursive" font-size="48" fill="white" text-anchor="middle">para você!</text>
+                
+                <!-- Decoração: Balões -->
+                <circle cx="90" cy="480" r="40" fill="#f1c40f" opacity="0.8"/>
+                <circle cx="310" cy="450" r="50" fill="#e74c3c" opacity="0.8"/>
+                <circle cx="150" cy="120" r="30" fill="#2ecc71" opacity="0.8"/>
+            </svg>
+
+            <!-- SVG 2: O INTERIOR DO CARTÃO -->
+            <svg id="card-inside" class="card-face" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <rect width="400" height="600" fill="#fff" />
+                <text x="200" y="80" font-family="Pacifico, cursive" font-size="42" fill="#2c3e50" text-anchor="middle">Feliz Aniversário!</text>
+                
+                <!-- Bolo de aniversário -->
+                <rect x="125" y="180" width="150" height="40" rx="5" fill="#e74c3c" />
+                <rect x="115" y="220" width="170" height="50" rx="5" fill="#f1c40f" />
+                <rect x="105" y="270" width="190" height="60" rx="5" fill="#3498db" />
+                
+                <!-- Velas -->
+                <rect x="185" y="140" width="15" height="40" fill="#9b59b6" />
+                <path d="M 192.5 120 A 15 15 0 0 1 192.5 140" fill="orange" />
+
+                <text x="200" y="400" font-family="Roboto, sans-serif" font-size="24" fill="#34495e" text-anchor="middle">Que seu dia seja tão incrível</text>
+                <text x="200" y="430" font-family="Roboto, sans-serif" font-size="24" fill="#34495e" text-anchor="middle">quanto você!</text>
+                <text x="200" y="520" font-family="Roboto, sans-serif" font-weight="bold" font-size="28" fill="#e74c3c" text-anchor="middle">Com muito carinho!</text>
+            </svg>
+        </div>
+    </div>
+
+    <div class="instructions">
+        Arraste para a esquerda para abrir
+    </div>
+
+    <script>
+        const cardFront = document.getElementById('card-front');
+        const cardContainer = document.querySelector('.card-container');
+
+        let isPointerDown = false;
+        let pointerStartX = 0;
+        let cardStartRotation = 0;
+
+        const onPointerDown = (e) => {
+            isPointerDown = true;
+            // Pega a coordenada inicial do clique ou do toque
+            pointerStartX = e.clientX || e.touches[0].clientX;
+            // Remove a transição para que o movimento seja instantâneo ao arrastar
+            cardFront.style.transition = 'none';
+            cardContainer.style.cursor = 'grabbing';
+            
+            // Verifica se o cartão está aberto ou fechado para definir o ponto de partida da rotação
+            const transform = cardFront.style.transform;
+            cardStartRotation = transform.includes('-180') ? -180 : 0;
+        };
+
+        const onPointerMove = (e) => {
+            if (!isPointerDown) return;
+            // Impede o comportamento padrão do navegador (como selecionar texto ou rolar)
+            e.preventDefault(); 
+
+            const currentX = e.clientX || e.touches[0].clientX;
+            const deltaX = currentX - pointerStartX;
+
+            // Sensibilidade: um arrasto de 200px corresponde a uma rotação de 180 graus
+            const ROTATION_SENSITIVITY = 180 / 200; 
+            
+            // Lógica ajustada para o arraste para a esquerda
+            let newRotation = cardStartRotation + (deltaX * ROTATION_SENSITIVITY);
+
+            // Limita a rotação entre -180 (totalmente aberto) e 0 (fechado)
+            newRotation = Math.max(-180, Math.min(0, newRotation));
+            
+            cardFront.style.transform = `rotateY(${newRotation}deg)`;
+        };
+
+        const onPointerUp = () => {
+            if (!isPointerDown) return;
+            isPointerDown = false;
+
+            cardContainer.style.cursor = 'grab';
+            // Reativa a transição para o efeito "snap" suave
+            cardFront.style.transition = 'transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+
+            // Pega a rotação atual do estilo do elemento
+            const transform = cardFront.style.transform;
+            const rotationMatch = /rotateY\(([-.\d]+)deg\)/.exec(transform);
+            const currentRotation = rotationMatch ? parseFloat(rotationMatch[1]) : cardStartRotation;
+
+            // Se o cartão passou da metade (-90 graus), ele abre por completo. Senão, ele fecha.
+            if (currentRotation < -90) {
+                cardFront.style.transform = 'rotateY(-180deg)';
+            } else {
+                cardFront.style.transform = 'rotateY(0deg)';
+            }
+        };
+
+        // Eventos para o Mouse
+        cardContainer.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+
+        // Eventos para Telas de Toque
+        cardContainer.addEventListener('touchstart', onPointerDown, { passive: true });
+        window.addEventListener('touchmove', onPointerMove, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+
+    </script>
+
+</body>
+</html>
+
+
+
